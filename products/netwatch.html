@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetWatch — P3 Labs</title>
+  <meta name="description" content="NetWatch: managed network intelligence for SMBs. RouterOS script-push data collection, anomaly detection, weekly email reports, and a REST API.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo">P3 Labs</a>
+      <div class="nav-links">
+        <a href="/products/">Products</a>
+        <a href="/#about">About</a>
+        <a href="/#team">Team</a>
+        <a href="/blog/">Blog</a>
+      </div>
+    </div>
+  </nav>
+
+  <article class="product-page">
+    <div class="container">
+      <a href="/products/" class="back-link">&larr; Back to products</a>
+      <h1 style="margin-top: 1.5rem;">NetWatch</h1>
+      <p class="product-tagline">Managed network intelligence for SMBs</p>
+
+      <div class="product-body">
+        <h2>What it does</h2>
+        <p>NetWatch collects interface statistics from fleets of RouterOS devices and delivers actionable network intelligence to your inbox. No dashboards to check, no agents to install on your routers &mdash; just weekly reports with traffic summaries, week-over-week trends, and anomaly alerts.</p>
+
+        <h2>How it works</h2>
+        <div class="feature-list">
+          <div class="feature">
+            <h3>RouterOS script-push model</h3>
+            <p>A lightweight RouterOS script runs on your devices and pushes interface statistics to the NetWatch ingest API. No SNMP polling, no port-forwarding &mdash; outbound HTTP from your routers is all you need. Supports both HTTPS and HTTP for RouterOS 6.x compatibility.</p>
+          </div>
+          <div class="feature">
+            <h3>Anomaly detection</h3>
+            <p>NetWatch tracks interface utilization patterns and flags deviations automatically. Get alerted when a link hits unusual traffic levels before it becomes a problem.</p>
+          </div>
+          <div class="feature">
+            <h3>Weekly email reports</h3>
+            <p>Every week, NetWatch sends a structured HTML email with per-interface traffic summaries, week-over-week change analysis, and flagged anomalies. Reports go directly to your inbox &mdash; no login required.</p>
+          </div>
+          <div class="feature">
+            <h3>REST API</h3>
+            <p>Full API access for device registration, data ingestion, and querying aggregated statistics. Bcrypt-authenticated device keys, rate limiting, and per-minute deduplication built in.</p>
+          </div>
+        </div>
+
+        <h2>Technical details</h2>
+        <ul>
+          <li>Go service with PostgreSQL storage</li>
+          <li>Monthly table partitioning for fast queries at scale</li>
+          <li>CLI-driven operations: serve, migrate, aggregate, report, cleanup</li>
+          <li>Rate limiting (2 req/min per device) with deduplication</li>
+          <li>Multi-tenant architecture with customer isolation</li>
+          <li>Email delivery via Resend API</li>
+        </ul>
+
+        <h2>Get started</h2>
+        <p>NetWatch is currently in early deployment. If you manage a fleet of Mikrotik routers and want better visibility into your network traffic, reach out to learn more.</p>
+
+        <div class="product-footer">
+          <a href="/products/" class="back-link">&larr; Back to products</a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 P3 Labs. MIT Licensed.</p>
+      <p class="footer-sub">Reykjav&iacute;k, Iceland</p>
+    </div>
+  </footer>
+</body>
+</html>

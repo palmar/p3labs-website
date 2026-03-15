@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mikrotik Traffic Monitor — P3 Labs</title>
+  <meta name="description" content="Mikrotik Traffic Monitor: open-source, single-binary SNMP traffic monitoring for Mikrotik routers with a real-time web dashboard.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo">P3 Labs</a>
+      <div class="nav-links">
+        <a href="/products/">Products</a>
+        <a href="/#about">About</a>
+        <a href="/#team">Team</a>
+        <a href="/blog/">Blog</a>
+      </div>
+    </div>
+  </nav>
+
+  <article class="product-page">
+    <div class="container">
+      <a href="/products/" class="back-link">&larr; Back to products</a>
+      <h1 style="margin-top: 1.5rem;">Mikrotik Traffic Monitor</h1>
+      <p class="product-tagline">Open-source SNMP traffic monitoring</p>
+
+      <div class="product-body">
+        <h2>What it does</h2>
+        <p>Mikrotik Traffic Monitor gives you real-time visibility into your Mikrotik router traffic. It's a single Go binary that polls your routers via SNMP and displays live throughput on a web dashboard. No agents, no database, no complex setup.</p>
+
+        <h2>Features</h2>
+        <div class="feature-list">
+          <div class="feature">
+            <h3>Single binary, zero dependencies</h3>
+            <p>The entire application &mdash; backend, frontend, chart library &mdash; compiles into one static binary with embedded assets. Download it, configure your devices, run it.</p>
+          </div>
+          <div class="feature">
+            <h3>SNMP v2c and v3</h3>
+            <p>Supports both SNMPv2c and SNMPv3 with full authentication and privacy protocol options. Works with any Mikrotik router without enabling experimental features.</p>
+          </div>
+          <div class="feature">
+            <h3>Real-time dashboard</h3>
+            <p>Server-Sent Events stream live throughput data to a dark-themed web UI. Per-interface charts with 20-minute rolling history using fixed-size ring buffers for predictable memory usage.</p>
+          </div>
+          <div class="feature">
+            <h3>Auto-discovery</h3>
+            <p>Automatically discovers all interfaces on your routers at startup. Handles unreachable devices gracefully without blocking the rest of your fleet.</p>
+          </div>
+        </div>
+
+        <h2>Quick start</h2>
+        <p>Create a <code>config.yaml</code> with your device details and run the binary:</p>
+        <pre><code>devices:
+  - name: core-router
+    host: 192.168.1.1
+    snmp_version: 2c
+    community: public</code></pre>
+        <p>Then open the dashboard in your browser and watch traffic in real time.</p>
+
+        <h2>Get it</h2>
+        <p>Mikrotik Traffic Monitor is open-source under the MIT license.</p>
+        <p><a href="https://github.com/palmar/mikrotik-traffic-monitor" class="product-cta">View on GitHub &rarr;</a></p>
+
+        <div class="product-footer">
+          <a href="/products/" class="back-link">&larr; Back to products</a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 P3 Labs. MIT Licensed.</p>
+      <p class="footer-sub">Reykjav&iacute;k, Iceland</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How we built P3 Labs — P3 Labs Blog</title>
+  <meta name="description" content="The story of P3 Labs: from mission statement to shipping two network monitoring products, built by a team of humans and AI agents.">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .blog-post { padding: 6rem 0 4rem; }
+    .blog-post h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    .blog-meta { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2.5rem; }
+    .blog-body h2 { font-size: 1.35rem; font-weight: 700; margin: 2rem 0 0.75rem; color: var(--text); }
+    .blog-body h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--text); }
+    .blog-body p { color: var(--text-muted); margin-bottom: 1rem; line-height: 1.7; }
+    .blog-body ul, .blog-body ol { color: var(--text-muted); margin: 0 0 1rem 1.5rem; line-height: 1.7; }
+    .blog-body li { margin-bottom: 0.4rem; }
+    .blog-body code { background: var(--bg-alt); border: 1px solid var(--border); border-radius: 4px; padding: 0.15rem 0.4rem; font-size: 0.9em; color: var(--accent); }
+    .blog-body strong { color: var(--text); }
+    .blog-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo">P3 Labs</a>
+      <div class="nav-links">
+        <a href="/products/">Products</a>
+        <a href="/#about">About</a>
+        <a href="/#team">Team</a>
+        <a href="/blog/">Blog</a>
+      </div>
+    </div>
+  </nav>
+
+  <article class="blog-post">
+    <div class="container">
+      <a href="/blog/" class="back-link">&larr; Back to blog</a>
+      <h1 style="margin-top: 1.5rem;">How we built P3 Labs</h1>
+      <p class="blog-meta">March 15, 2026</p>
+
+      <div class="blog-body">
+        <p>P3 Labs is a small company based in Iceland. We build practical tools for a world where humans and AI work side by side. This is the story of how we went from a mission statement to shipping our first two products.</p>
+
+        <h2>What P3 Labs is</h2>
+        <p>We started with a simple premise: AI agents can do real engineering work, not just generate boilerplate. We wanted to build a company that proves it &mdash; where AI agents are teammates, not tools you prompt once and walk away from.</p>
+        <p>Our team includes human leadership and AI agents that collaborate daily. The agents write code, review architecture, deploy infrastructure, and monitor systems. The humans set direction, make calls, and keep the mission on track. We're transparent about this because we think it's the future, and there's no point hiding it.</p>
+
+        <h2>Product #1: Mikrotik Traffic Monitor</h2>
+        <p>Our first product came from a simple need: real-time visibility into Mikrotik router traffic without heavy monitoring stacks.</p>
+        <p>Mikrotik Traffic Monitor is a single-binary Go application that polls your routers via SNMP and shows live throughput on a web dashboard. No agents to install on the router, no database, no complex setup. Point it at your devices and you're watching traffic in seconds.</p>
+
+        <h3>Key technical decisions</h3>
+        <ul>
+          <li><strong>Go with embedded assets.</strong> The entire application &mdash; backend, frontend, chart library &mdash; compiles into one static binary. No runtime dependencies. Download it, run it, done.</li>
+          <li><strong>SNMP over API.</strong> RouterOS has an API, but SNMP is universal, well-understood, and doesn't require enabling experimental features. We support both SNMPv2c and SNMPv3 with full auth and privacy protocol options.</li>
+          <li><strong>Server-Sent Events for real-time updates.</strong> No WebSocket complexity. SSE is simple, HTTP-native, and works great for one-directional data streams like metrics.</li>
+          <li><strong>YAML configuration.</strong> We started with environment variables but moved to YAML when multi-device support made env vars unwieldy. A config file per deployment is simpler to manage than a dozen <code>DEVICE_N_*</code> variables.</li>
+          <li><strong>Ring buffers for history.</strong> Fixed-size in-memory ring buffers (default 240 samples at 5-second intervals = 20 minutes) mean predictable memory usage regardless of how long the monitor runs.</li>
+        </ul>
+        <p>We shipped v0.1.0 under MIT license. It auto-discovers interfaces, handles unreachable devices gracefully at startup, and includes a dark-themed UI built for NOC dashboards.</p>
+
+        <h2>Product #2: NetWatch</h2>
+        <p>Mikrotik Traffic Monitor solves the "right now" problem. NetWatch solves the "over time" problem: collecting interface statistics from fleets of RouterOS devices and delivering weekly reports to their owners.</p>
+        <p>NetWatch is a multi-tenant backend service. Customers register devices, those devices push interface stats to an ingest API, and NetWatch handles aggregation, anomaly detection, and weekly email reports.</p>
+
+        <h3>Key technical decisions</h3>
+        <ul>
+          <li><strong>Go + PostgreSQL.</strong> Go for the service, Postgres for the data. No ORM &mdash; raw SQL with the <code>lib/pq</code> driver. The schema is straightforward and the queries are explicit.</li>
+          <li><strong>Monthly table partitioning.</strong> Interface data points pile up fast. We partition the <code>data_points</code> table by month so queries stay fast and old data can be dropped cleanly.</li>
+          <li><strong>Bcrypt device authentication.</strong> Devices authenticate with a key that's bcrypt-hashed on registration. No tokens to rotate, no sessions to manage. Simple and secure.</li>
+          <li><strong>Rate limiting + deduplication.</strong> Two requests per minute per device, plus per-minute-bucket dedup tracking. This handles both intentional floods and accidental double-submissions from RouterOS scripts.</li>
+          <li><strong>HTTP fallback for RouterOS 6.x.</strong> Older RouterOS versions have limited TLS support. Rather than lock out legacy devices, we accept HTTP with the same auth model. Pragmatic beats pure.</li>
+          <li><strong>Email-first reporting.</strong> No web dashboard for reports. Weekly HTML emails via the Resend API deliver traffic summaries, week-over-week changes, and anomalies directly to the customer's inbox. Async and zero-friction.</li>
+          <li><strong>CLI-driven operations.</strong> Separate commands for serving, migrating, aggregating, reporting, and cleanup. Each can be scheduled independently with cron. No monolithic process, no job queue dependency.</li>
+        </ul>
+
+        <h2>How the team worked</h2>
+        <p>Building these products wasn't a solo effort. Our AI agents handled different parts of the process:</p>
+        <ul>
+          <li>The <strong>Senior Architect</strong> wrote the product spec for NetWatch &mdash; proposing the product, defining the data model, specifying API contracts, and evaluating trade-offs.</li>
+          <li>The <strong>Founding Engineer</strong> built both products end to end &mdash; writing Go services, designing schemas, implementing frontends, and shipping releases.</li>
+          <li>The <strong>System Administrator</strong> handles DNS, hosting, deployment, and infrastructure.</li>
+          <li>The <strong>CEO</strong> set priorities, coordinated between agents, and made the call on what to build first.</li>
+        </ul>
+        <p>Coordination happens through a task management system where agents pick up work, post status updates, and escalate blockers. It's structured enough to keep things moving and loose enough to not get in the way.</p>
+
+        <h2>What we learned</h2>
+        <p><strong>Simple tools get used.</strong> The Mikrotik Traffic Monitor works because it does one thing well: show you your traffic, right now. No setup wizard, no account creation, no cloud dependency.</p>
+        <p><strong>Start with the data model.</strong> For NetWatch, getting the partitioning and aggregation strategy right early meant we didn't have to rewrite anything when the data volume projections came in. The schema is the product.</p>
+        <p><strong>Ship the boring version.</strong> NetWatch sends emails, not real-time dashboards. That's a feature, not a limitation. Customers don't need another tab to check &mdash; they need a summary in their inbox once a week.</p>
+        <p><strong>AI agents work best with clear scope.</strong> Give an agent a well-defined task with context, and it'll execute. Give it a vague directive, and you'll spend more time correcting than you saved. We learned to write good specs before writing code.</p>
+
+        <h2>What's next</h2>
+        <p>We're deploying NetWatch to production, setting up cost tracking, and continuing to build in public. If you're running Mikrotik routers and want better visibility into your network, both products are open source under MIT license.</p>
+        <p>This is just the beginning. We'll keep sharing what we build and what we learn along the way.</p>
+
+        <div class="blog-footer">
+          <p><a href="/blog/" class="back-link">&larr; Back to blog</a></p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 P3 Labs. MIT Licensed.</p>
+      <p class="footer-sub">Reykjavik, Iceland</p>
+    </div>
+  </footer>
+</body>
+</html>
